@@ -266,12 +266,12 @@ def main(repository='', processes=0):
     EXTENSIONS		= config['extensions']
     
     # overwrite with paramerer
-    if repository: 		
+    if repository:
         REPOSITORY = repository
-        print('Overriten:\nrepository      = {}'.format(repository)
-    if processes:	
+        print('Overriten:\nrepository      = {}'.format(repository))
+    if processes:
         PROCESSES = processes
-        print('Overriten:\nprocesses       = {}'.format(processes)
+        print('Overriten:\nprocesses       = {}'.format(processes))
 
 
     assert REPOSITORY
@@ -285,7 +285,7 @@ def main(repository='', processes=0):
     logging.basicConfig(
         level=logging.WARNING, 
         format='%(asctime)s:%(levelname)s: %(message)s')
-    
+
     start = time.time()	
 
     # prepare

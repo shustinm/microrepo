@@ -157,7 +157,6 @@ def worker(names):
                 logging.debug('Skipping package type %s: %s...' % (packagetype, filename))
                 continue
             
-            extention = ''
             if '.' in filename:
                 extension = filename.split('.')[-1]
             if extension not in EXTENSIONS:

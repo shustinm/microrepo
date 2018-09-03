@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # download all source packages from https://pypi.python.org
 import sys
@@ -284,7 +284,7 @@ def main(repository='', processes=0):
 
     logging.basicConfig(
         level=logging.WARNING, 
-        format='%(asctime)s:%(levelname)s: %(message)s')
+        format='%(asctime)s:%(3levelname)s: %(message)s')
 
     start = time.time()	
 

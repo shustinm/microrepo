@@ -21,30 +21,30 @@ def main():
     packagetypes = {}
     extensions = {}
     table = {}
-    for p in packages:
+    for package in packages:
         total += 1
-        info = p['info']
+        info = package['info']
         name = info['name']
         author = info['author']
         email = info['author_email']
         version = info['version']
         summary = info['summary']
-        urls = p['urls']
-        releases = p['releases']
-        for u in urls:
-            extension = u['filename'].split('.')[-1]
+        urls = package['urls']
+        releases = package['releases']
+        for url in urls:
+            extension = url['filename'].split('.')[-1]
             if extension not in extensions:
                 extensions[extension] = extension
-            packagetype = u['packagetype']
+            packagetype = url['packagetype']
             if packagetype not in packagetypes:
                 packagetypes[packagetype] = packagetype
-            python_version = u['python_version']
+            python_version = url['python_version']
             if python_version not in pyversions:
                 pyversions[python_version] = python_version
 
             key = '%s %s %s' % (python_version, packagetype , extension)
             if key not in combinations:
-                combinations[key] = [u['filename'],0]
+                combinations[key] = [url['filename'],0]
             combinations[key][1] += 1
 
         # 'author,email,version,size,summary,

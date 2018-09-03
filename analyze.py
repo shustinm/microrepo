@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #
 # explore packages stats
-
 import sys
 import os
 import time
@@ -97,7 +96,7 @@ def main():
 				# print (line)
 				w.write(line.encode('utf-8'))
 				# break			
-	print ('time:', (time.time()-start))
+	print('time:', (time.time()-start))
 
 
 

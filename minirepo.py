@@ -31,19 +31,9 @@ PROCESSES = 10
 # PACKAGE_TYPES = ['bdist_egg', 'bdist_wheel', 'sdist']
 # EXTENSIONS = ['bz2', 'egg', 'gz', 'tgz', 'whl', 'zip']
 
-PYTHON_VERSIONS = ['cp3.6']
+PYTHON_VERSIONS = ['cp36']
 PACKAGE_TYPES = ['bdist_wheel']
 EXTENSIONS = ['whl']
-
-'''
-# available options in pypi
-PYTHON_VERSIONS = ['2', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.7.6', '3.0', '3.1', '3.2', '3.3', '3.4', '3.5', 'any',
-                   'cp25', 'cp26', 'cp27', 'cp31', 'cp32', 'cp33', 'cp34', 'cp35', 'image/tools/scikit_image', 'py2', 'py2.py3',
-                   'py2.py3.cp26.cp27.cp32.cp33.cp34.cp35.pp27.pp32', 'py2.py3.cp27.cp26.cp32.cp33.cp34.pp27', 'py26', 'py27',
-                   'py27.py32.py33', 'py3', 'py32, py33, py34', 'py33', 'py34', 'python', 'source']
-PACKAGE_TYPES = ['bdist_dmg', 'bdist_dumb', 'bdist_egg', 'bdist_msi', 'bdist_rpm', 'bdist_wheel', 'bdist_wininst', 'sdist']
-EXTENSIONS = ['bz2', 'deb', 'dmg', 'egg', 'exe', 'gz', 'msi', 'rpm', 'tgz', 'whl', 'zip']
-'''
 
 # I had to do this to setup max_retries in requests
 session = requests.Session()
@@ -53,9 +43,9 @@ session.mount('https://', adapter)
 def bytes_human(num):
     for x in ['bytes','KB','MB','GB']:
         if num < 1024.0:
-            return "%3.1f%s" % (num, x)
+            return '%3.1f%s' % (num, x)
         num /= 1024.0
-    return "%3.1f%s" % (num, 'TB')
+    return '%3.1f%s' % (num, 'TB')
 
 def get_names():
     # xmlrpc is slower
@@ -86,10 +76,10 @@ def get_chunks(seq, num):
 
 
 def prune(releases, current_version):
-    '''
+    """
     delete all versions different that current_version
     and return bytes deleted
-    '''
+    """
     bytes = 0
     for v, dist_list in releases.items():
         if v == current_version:
@@ -103,10 +93,10 @@ def prune(releases, current_version):
     return bytes
 
 def worker(names):
-    '''
+    """
     function to run in parallel, names is a list of packages names,
     return tuple (pid, total packages, total bytes, total bytes cleaned)
-    '''
+    """
     package = None
     pid = os.getpid()
     wname = TEMP + '/worker.%s' % pid
@@ -120,10 +110,10 @@ def worker(names):
     bytes_downloaded = 0
     bytes_cleaned = 0
     
-    for p in names:	
+    for name in names:	
         try:
             i+=1
-            json_url = 'https://pypi.python.org/pypi/%s/json' % p
+            json_url = 'https://pypi.python.org/pypi/{}/json'.format(name)
             resp = session.get(json_url, timeout=30)
 
             if not resp.status_code == requests.codes['ok']:
@@ -138,7 +128,7 @@ def worker(names):
 
         except Exception as ex:
             if not 'Not Found' in repr(ex):
-                logging.error('%s: %s' % (json_url, ex))
+                logging.error('{}: {}'.format(json_url, ex))
                 # time.sleep(random.uniform(1.0,2.5))
             continue
 
@@ -211,31 +201,32 @@ def worker(names):
 
 
 def get_config():
-    config_file = os.path.expanduser(os.path.join('~'), '.', PROJECT_NAME)
-    repository = os.path.expanduser(os.path.join('~'), PROJECT_NAME)
+    config_file = os.path.join(os.path.expanduser('~'), '.{}'.format(PROJECT_NAME))
+    repository = os.path.join(os.path.expanduser('~'), PROJECT_NAME)
     processes = PROCESSES
     try:
-        config 	= json.load(open(config_file))
+        config = json.load(open(config_file))
     except:
-        newrepo = raw_input('Repository folder [{}]: '.format(repository))
+        newrepo = input('Repository folder [{}]: '.format(repository))
         if newrepo:
             repository = newrepo
-        newprocesses = raw_input('Number of processes [{}}]: '.format(processes))
+        newprocesses = input('Number of processes [{}]: '.format(processes))
         if newprocesses:
             processes = newprocesses
         config = {}
-        config["repository"]		= repository
-        config["processes"]			= processes
-        config["python_versions"]	= PYTHON_VERSIONS
-        config["package_types"]		= PACKAGE_TYPES
-        config["extensions"]		= EXTENSIONS
+        config['repository']		= repository
+        config['processes']			= processes
+        config['python_versions']	= PYTHON_VERSIONS
+        config['package_types']		= PACKAGE_TYPES
+        config['extensions']		= EXTENSIONS
 
         with open(config_file, 'w') as w:
             json.dump(config, w, indent=2)
 
     for c in sorted(config):
+        # TODO: what the hell is this formatting
         print('%-15s = %s' % (c,config[c]))
-    print('Using config file %s ' % config_file)
+    print('Using config file {}'.format(config_file))
 
     return config
 
@@ -264,23 +255,23 @@ def save_json(pids):
 def main(repository='', processes=0):
     global REPOSITORY,PROCESSES,PYTHON_VERSIONS,PACKAGE_TYPES,EXTENSIONS
     
-    print('/******** Minirepo ********/')
+    print('/******** Microrepo ********/')
     
     # get configuraiton values
     config 			= get_config()
-    REPOSITORY		= config["repository"]
-    PROCESSES		= config["processes"]
-    PYTHON_VERSIONS	= config["python_versions"]
-    PACKAGE_TYPES	= config["package_types"]
-    EXTENSIONS		= config["extensions"]
+    REPOSITORY		= config['repository']
+    PROCESSES		= config['processes']
+    PYTHON_VERSIONS	= config['python_versions']
+    PACKAGE_TYPES	= config['package_types']
+    EXTENSIONS		= config['extensions']
     
     # overwrite with paramerer
     if repository: 		
         REPOSITORY = repository
-        print('Overriten:\nrepository      = %s' % repository)
+        print('Overriten:\nrepository      = {}'.format(repository)
     if processes:	
         PROCESSES = processes
-        print('Overriten:\nprocesses       = %s' % processes)
+        print('Overriten:\nprocesses       = {}'.format(processes)
 
 
     assert REPOSITORY
@@ -293,7 +284,7 @@ def main(repository='', processes=0):
 
     logging.basicConfig(
         level=logging.WARNING, 
-        format="%(asctime)s:%(levelname)s: %(message)s")
+        format='%(asctime)s:%(levelname)s: %(message)s')
     
     start = time.time()	
 

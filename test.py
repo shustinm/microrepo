@@ -10,7 +10,7 @@ def test():
 	repository = tempfile.mkdtemp()
 	minirepo.MAX = 1
 	processes = 2
-	print ('repo will be', repository)
+	print('repo will be', repository)
 	
 	minirepo.main(repository, processes)
 

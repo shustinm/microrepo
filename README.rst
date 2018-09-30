@@ -1,6 +1,6 @@
 .. _github: https://github.com/shustinm/microrepo
 
-********
+*********
 Microrepo
 *********
 

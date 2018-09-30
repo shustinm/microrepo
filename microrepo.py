@@ -26,11 +26,6 @@ MAX = 0
 # number of processes to run in parallel
 PROCESSES = 10
 
-# filters, only interested in this types
-# PYTHON_VERSIONS = ['2.7', 'any', 'cp27', 'py2', 'py2.py3', 'py27', 'source']
-# PACKAGE_TYPES = ['bdist_egg', 'bdist_wheel', 'sdist']
-# EXTENSIONS = ['bz2', 'egg', 'gz', 'tgz', 'whl', 'zip']
-
 PYTHON_VERSIONS = ['cp36']
 PACKAGE_TYPES = ['bdist_wheel']
 EXTENSIONS = ['whl']
@@ -48,11 +43,6 @@ def bytes_human(num):
     return '%3.1f%s' % (num, 'TB')
 
 def get_names():
-    # xmlrpc is slower
-    # import xmlrpclib
-    # xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
-    # return client.list_packages()
-    
     # use simple API
     # resp = urllib2.urlopen('https://pypi.python.org/simple')
     # tree = ElementTree.parse(resp)
@@ -85,7 +75,7 @@ def prune(releases, current_version):
         if v == current_version:
             continue
         for dist in dist_list:
-            path = '%s/%s' % (REPOSITORY, dist['filename']) 
+            path = '%s/%s' % (REPOSITORY, dist['filename'])
             if os.path.exists(path):
                 bytes += os.stat(path).st_size
                 os.remove(path)
@@ -99,20 +89,18 @@ def worker(names):
     """
     package = None
     pid = os.getpid()
-    wname = TEMP + '/worker.%s' % pid
-    print('starting worker file %s...' % wname)
+    wname = TEMP + '/worker.{}'.format(pid)
+    print('starting worker file {}...'.format(name))
 
     afile = open(wname, 'a')
 
-    i = 0
     total = 1.0*len(names)
     packages_downloaded = 0
     bytes_downloaded = 0
     bytes_cleaned = 0
-    
-    for name in names:	
+
+    for i, name in names:
         try:
-            i+=1
             json_url = 'https://pypi.python.org/pypi/{}/json'.format(name)
             resp = session.get(json_url, timeout=30)
 
@@ -120,8 +108,8 @@ def worker(names):
                 resp.raise_for_status()
 
             # get json
-            package = resp.json()		
-            
+            package = resp.json()
+
             # write json info
             json.dump(package, afile, indent=3)
             afile.write(',\n')
@@ -139,46 +127,46 @@ def worker(names):
         # delete old versions if they are local
         bytes_cleaned += prune(package['releases'], version)
 
-        
+
         for url in package['urls']:
             filename 		= url['filename']
             packagetype 	= url['packagetype']
-            python_version  = url['python_version']
-            download_url 	= url['url']						
-            size 			= url['size']
-            md5_digest 		= url['md5_digest']			
-            
+            python_version      = url['python_version']
+            download_url 	= url['url']
+            size 		= url['size']
+            md5_digest 		= url['md5_digest']
+
             if python_version not in PYTHON_VERSIONS:
-                logging.debug('Skipping python version %s: %s...' % (python_version, filename))
+                logging.debug('Skipping python version {}: {}...'.format(python_version, filename))
                 continue
-            
-            
+
+
             if packagetype not in PACKAGE_TYPES:
-                logging.debug('Skipping package type %s: %s...' % (packagetype, filename))
+                logging.debug('Skipping package type {}: {}...'.format(packagetype, filename))
                 continue
-            
+
             if '.' in filename:
                 extension = filename.split('.')[-1]
             if extension not in EXTENSIONS:
-                logging.debug('Skipping extension %s: %s...' % (extension, filename))
+                logging.debug('Skipping extension {}: {}...'.format(extension, filename))
                 continue
 
-            
+
             # skip if already in repo
-            path = '%s/%s' % (REPOSITORY, filename)
+            path = '{}/{}'.format(REPOSITORY, filename)
             if os.path.exists(path) and os.lstat(path).st_size == size:
-                logging.debug('Already local: %s' % filename)
+                logging.debug('Already local: {}'.format(filename))
                 continue
-            
+
             try:
                 resp = session.get(download_url, timeout=300)
                 if not resp.status_code == requests.codes['ok']:
                     resp.raise_for_status()
-                
+
                 # save file
                 with open(path,'wb') as w:
                     w.write(resp.content)
-                
+
                 # sum total bytes and count
                 bytes_downloaded += size
                 packages_downloaded += 1
@@ -187,12 +175,12 @@ def worker(names):
                 check = 'Ok' if hashlib.md5(resp.content).hexdigest() == md5_digest else 'md5 failed'
                 progress = int(i/total*100.0)
                 logging.warning('Downloaded: %-50s %s pid:%s %s%% [%s/%s]' % (filename,check,pid,progress,i,total))
-                
+
             except Exception as ex:
-                logging.error('Failed    : %s. %s' % (download_url, ex))
-            
+                logging.error('Failed    : {}. {}'.format(download_url, ex))
+
         # for testing, a minimal number of downloads will be specified
-        if MAX > 0 and i==MAX:
+        if MAX > 0 and i is MAX:
             break
 
     afile.close()
@@ -235,12 +223,12 @@ def save_json(pids):
     with open(db,'w') as w:
         w.write('[\n')
         for pid in pids:
-            wfile = TEMP + '/worker.%s' % pid
+            wfile = TEMP + '/worker.{}'.format(pid)
             with open(wfile) as r:
                 w.write(r.read())
             os.remove(wfile)
-            print('deleted: %s' % wfile)
-    
+            print('deleted: {}'.format(wfile))
+
     # remove tailing comma, remove last 2 characters (',\n')
     with open(db, 'rb+') as w:
         w.seek(-2, os.SEEK_END)
@@ -253,17 +241,17 @@ def save_json(pids):
 
 def main(repository='', processes=0):
     global REPOSITORY,PROCESSES,PYTHON_VERSIONS,PACKAGE_TYPES,EXTENSIONS
-    
+
     print('/******** Microrepo ********/')
-    
+
     # get configuraiton values
-    config 			= get_config()
+    config 		= get_config()
     REPOSITORY		= config['repository']
     PROCESSES		= config['processes']
     PYTHON_VERSIONS	= config['python_versions']
     PACKAGE_TYPES	= config['package_types']
     EXTENSIONS		= config['extensions']
-    
+
     # overwrite with paramerer
     if repository:
         REPOSITORY = repository
@@ -282,26 +270,26 @@ def main(repository='', processes=0):
     assert os.path.isdir(REPOSITORY)
 
     logging.basicConfig(
-        level=logging.WARNING, 
+        level=logging.WARNING,
         format='%(asctime)s:%(levelname)s: %(message)s')
 
-    start = time.time()	
+    start = time.time()
 
     # prepare
     names = get_names()
     pool = mp.Pool(PROCESSES)
     random.shuffle(names)
     chunks = list(get_chunks(names, PROCESSES))
-    
+
     # run in parallel
     # (pids, totals, bytes, cleaned)
     results = pool.map_async(worker, chunks).get(timeout=99999)
-    
+
     # get summary
-    pids 				= [r[0] for r in results]
+    pids		= [r[0] for r in results]
     packages_downloaded = sum([r[1] for r in results])
     bytes_downloaded 	= sum([r[2] for r in results])
-    bytes_cleaned 		= sum([r[3] for r in results])
+    bytes_cleaned 	= sum([r[3] for r in results])
 
     # store full list of packages in json format for later analysis
     save_json(pids)
@@ -315,7 +303,7 @@ def main(repository='', processes=0):
     print('packages downloaded = %s' % packages_downloaded)
     print('bytes downloaded    = %s' % bytes_human(bytes_downloaded))
     print('bytes cleaned       = %s' % bytes_human(bytes_cleaned))
-    
+
     print('time:', (time.time()-start))
 
 

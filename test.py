@@ -3,16 +3,16 @@ import tempfile
 import shutil
 import json
 import logging
-import minirepo
+import microrepo
 
 def test():
 	logging.basicConfig(level=logging.DEBUG)
 	repository = tempfile.mkdtemp()
-	minirepo.MAX = 1
+	microrepo.MAX = 1
 	processes = 2
 	print('repo will be', repository)
 	
-	minirepo.main(repository, processes)
+	microrepo.main(repository, processes)
 
 	files = os.listdir(repository)
 	print(files)

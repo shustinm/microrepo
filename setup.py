@@ -9,7 +9,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='minirepo',
+    name='microrepo',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
@@ -20,11 +20,11 @@ setup(
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/sganis/minirepo',
+    url='https://github.com/shustinm/microrepo',
 
     # Author details
-    author='sganis',
-    author_email='sganis@gmail.com',
+    author='Michael Shustin',
+    author_email='michaelshustin@gmail.com',
 
     # Choose your license
     license='MIT',
@@ -47,17 +47,17 @@ setup(
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.7',
     ],
 
     # What does your project relate to?
-    keywords='minirepo development pip mirror packages offline repository',
+    keywords='microrepo development pip mirror packages offline repository',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     # packages=find_packages(exclude=['contrib', 'docs', 'tests*']),  
-    # packages = ['minirepo'],
-    py_modules = ['minirepo'],
+    # packages = ['microrepo'],
+    py_modules = ['microrepo'],
 
     # List run-time dependencies here.  These will be installed by pip when
     # your project is installed. For an analysis of "install_requires" vs pip's
@@ -70,7 +70,7 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'console_scripts': [
-            'minirepo=minirepo:main',
+            'microrepo=microrepo:main',
         ],
     },
 )

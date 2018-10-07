@@ -26,6 +26,7 @@ MAX = 0
 # number of processes to run in parallel
 PROCESSES = 10
 
+ARCHITECTURES = ['x86_64', 'i686', 'win32', 'win_amd64', 'macosx']
 PYTHON_VERSIONS = ['cp36']
 PACKAGE_TYPES = ['bdist_wheel']
 EXTENSIONS = ['whl']
@@ -151,6 +152,7 @@ def worker(names):
                 logging.debug('Skipping extension {}: {}...'.format(extension, filename))
                 continue
 
+            # TODO: Implement filter by architecture, how to know if it's for a specific architecture or 'any'
 
             # skip if already in repo
             path = '{}/{}'.format(REPOSITORY, filename)
@@ -202,7 +204,8 @@ def get_config():
             processes = newprocesses
         config = {}
         config['repository']		= repository
-        config['processes']			= processes
+        config['processes']		= processes
+        config['architectures']         = ARCHITECTURES
         config['python_versions']	= PYTHON_VERSIONS
         config['package_types']		= PACKAGE_TYPES
         config['extensions']		= EXTENSIONS
@@ -246,6 +249,7 @@ def main(repository='', processes=0):
 
     # get configuraiton values
     config 		= get_config()
+    ARCHITECTURES       = config['architectures']
     REPOSITORY		= config['repository']
     PROCESSES		= config['processes']
     PYTHON_VERSIONS	= config['python_versions']
@@ -255,10 +259,10 @@ def main(repository='', processes=0):
     # overwrite with paramerer
     if repository:
         REPOSITORY = repository
-        print('Overriten:\nrepository      = {}'.format(repository))
+        print('Overriten:\nrepository:       {}'.format(repository))
     if processes:
         PROCESSES = processes
-        print('Overriten:\nprocesses       = {}'.format(processes))
+        print('Overriten:\nprocesses:        {}'.format(processes))
 
 
     assert REPOSITORY
@@ -296,15 +300,15 @@ def main(repository='', processes=0):
 
     # cleanup
     shutil.rmtree(TEMP)
-    print('temp folder deleted: %s' % TEMP)
+    print('temp folder deleted: {}'.format(TEMP))
 
     # print summary
     print('summary:')
-    print('packages downloaded = %s' % packages_downloaded)
-    print('bytes downloaded    = %s' % bytes_human(bytes_downloaded))
-    print('bytes cleaned       = %s' % bytes_human(bytes_cleaned))
+    print('packages downloaded:  {}'.format(packages_downloaded)
+    print('bytes downloaded:     {}'.format(bytes_human(bytes_downloaded)))
+    print('bytes cleaned:        {}'.format(bytes_human(bytes_cleaned)))
 
-    print('time:', (time.time()-start))
+    print('time: {}', str((time.time()-start)))
 
 
 

@@ -91,7 +91,7 @@ def worker(names):
     package = None
     pid = os.getpid()
     wname = TEMP + '/worker.{}'.format(pid)
-    print('starting worker file {}...'.format(name))
+    print('starting worker file {}...'.format(wname))
 
     afile = open(wname, 'a')
 
@@ -100,7 +100,7 @@ def worker(names):
     bytes_downloaded = 0
     bytes_cleaned = 0
 
-    for i, name in names:
+    for i, name in enumerate(names):
         try:
             json_url = 'https://pypi.python.org/pypi/{}/json'.format(name)
             resp = session.get(json_url, timeout=30)
@@ -249,7 +249,7 @@ def main(repository='', processes=0):
 
     # get configuraiton values
     config 		= get_config()
-    ARCHITECTURES       = config['architectures']
+    # ARCHITECTURES       = config['architectures']
     REPOSITORY		= config['repository']
     PROCESSES		= config['processes']
     PYTHON_VERSIONS	= config['python_versions']
@@ -304,7 +304,7 @@ def main(repository='', processes=0):
 
     # print summary
     print('summary:')
-    print('packages downloaded:  {}'.format(packages_downloaded)
+    print('packages downloaded:  {}'.format(packages_downloaded))
     print('bytes downloaded:     {}'.format(bytes_human(bytes_downloaded)))
     print('bytes cleaned:        {}'.format(bytes_human(bytes_cleaned)))
 
